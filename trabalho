@@ -1,80 +1,38 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const cors = require('cors');
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
-// Conectar ao banco de dados
-mongoose.connect('mongodb://localhost:27017/crud-example', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'Erro de conexão com o banco de dados:'));
-db.once('open', () => {
-  console.log('Conexão estabelecida com o banco de dados.');
+const alunos = [];
+
+// Rotas para o CRUD de alunos
+app.get('/alunos', (req, res) => {
+  res.json(alunos);
 });
 
-// Definir o esquema do livro
-const bookSchema = new mongoose.Schema({
-  title: String,
-  author: String,
-  genre: String
-});
-const Book = mongoose.model('Book', bookSchema);
-
-// Rotas CRUD
-app.post('/books', (req, res) => {
-  const { title, author, genre } = req.body;
-  const book = new Book({ title, author, genre });
-  book.save((err, savedBook) => {
-    if (err) {
-      console.error('Erro ao salvar o livro:', err);
-      res.status(500).send('Erro ao salvar o livro.');
-    } else {
-      res.status(201).json(savedBook);
-    }
-  });
+app.post('/alunos', (req, res) => {
+  const aluno = req.body;
+  alunos.push(aluno);
+  res.json(aluno);
 });
 
-app.get('/books', (req, res) => {
-  Book.find((err, books) => {
-    if (err) {
-      console.error('Erro ao buscar os livros:', err);
-      res.status(500).send('Erro ao buscar os livros.');
-    } else {
-      res.json(books);
-    }
-  });
+app.put('/alunos/:id', (req, res) => {
+  const id = req.params.id;
+  const alunoAtualizado = req.body;
+  alunos[id] = alunoAtualizado;
+  res.json(alunoAtualizado);
 });
 
-app.put('/books/:id', (req, res) => {
-  const { id } = req.params;
-  const { title, author, genre } = req.body;
-  Book.findByIdAndUpdate(id, { title, author, genre }, { new: true }, (err, updatedBook) => {
-    if (err) {
-      console.error('Erro ao atualizar o livro:', err);
-      res.status(500).send('Erro ao atualizar o livro.');
-    } else {
-      res.json(updatedBook);
-    }
-  });
+app.delete('/alunos/:id', (req, res) => {
+  const id = req.params.id;
+  const alunoExcluido = alunos[id];
+  alunos.splice(id, 1);
+  res.json(alunoExcluido);
 });
 
-app.delete('/books/:id', (req, res) => {
-  const { id } = req.params;
-  Book.findByIdAndRemove(id, (err, removedBook) => {
-    if (err) {
-      console.error('Erro ao remover o livro:', err);
-      res.status(500).send('Erro ao remover o livro.');
-    } else {
-      res.json(removedBook);
-    }
-  });
-});
-
-// Iniciar o servidor
-const port = 3000;
+const port = 5000;
 app.listen(port, () => {
-  console.log(`Servidor iniciado na porta ${port}.`);
+  console.log(`Servidor rodando em https://github.com/caiokenai/CRUD/blob/main/trabalho:${port}`);
 });
